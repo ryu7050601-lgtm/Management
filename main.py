@@ -28,7 +28,9 @@ intents.members = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# --- [공용 기능] 채널 닫기 버튼 뷰 ---
+# ---------------------------------------------------------
+# [공용 기능] 채널 닫기 버튼 뷰
+# ---------------------------------------------------------
 class CloseTicketView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
@@ -38,7 +40,9 @@ class CloseTicketView(discord.ui.View):
         await interaction.response.send_message("채널을 삭제합니다...", ephemeral=True)
         await interaction.channel.delete()
 
-# --- [문의 기능] 1. 문의 정보 입력창 (Modal) ---
+# ---------------------------------------------------------
+# [문의 기능] 모달 및 뷰
+# ---------------------------------------------------------
 class InquiryModal(discord.ui.Modal, title='📬 문의하기'):
     subject = discord.ui.TextInput(
         label='문의 사항',
@@ -57,7 +61,7 @@ class InquiryModal(discord.ui.Modal, title='📬 문의하기'):
         guild = interaction.guild
         user = interaction.user
 
-        # 채널 권한 설정 (관리자와 유저만 보이게)
+        # 채널 생성 권한 설정
         overwrites = {
             guild.default_role: discord.PermissionOverwrite(read_messages=False),
             user: discord.PermissionOverwrite(read_messages=True, send_messages=True),
@@ -67,7 +71,6 @@ class InquiryModal(discord.ui.Modal, title='📬 문의하기'):
             if role.permissions.administrator:
                 overwrites[role] = discord.PermissionOverwrite(read_messages=True, send_messages=True)
 
-        # 문의 전용 채널 생성
         channel = await guild.create_text_channel(name=f"📬-{user.name}-문의", overwrites=overwrites)
 
         embed = discord.Embed(title="📬 새로운 문의 내용", color=0x3CA45C)
@@ -75,10 +78,9 @@ class InquiryModal(discord.ui.Modal, title='📬 문의하기'):
         embed.add_field(name="문의 내용", value=self.content.value, inline=False)
         embed.set_footer(text=f"작성자: {user.name} ({user.id})")
 
-        await channel.send(content=f"{user.mention}님, 문의가 접수되었습니다. 관리자가 확인 후 답변드릴 예정입니다.", embed=embed, view=CloseTicketView())
+        await channel.send(content=f"{user.mention}님, 문의가 접수되었습니다.", embed=embed, view=CloseTicketView())
         await interaction.response.send_message(f"{channel.mention} 채널이 생성되었습니다.", ephemeral=True)
 
-# --- [문의 기능] 2. 문의하기 버튼 뷰 ---
 class InquiryView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
@@ -87,7 +89,9 @@ class InquiryView(discord.ui.View):
     async def inquiry_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.send_modal(InquiryModal())
 
-# --- [구매 기능] 1. 주문 정보 입력창 (Modal) ---
+# ---------------------------------------------------------
+# [구매 기능] 모달 및 뷰
+# ---------------------------------------------------------
 class OrderModal(discord.ui.Modal, title='상품 구매 정보 입력'):
     item_name = discord.ui.TextInput(label='구매 상품', placeholder='구매하실 상품 이름을 입력하세요.', required=True)
     quantity = discord.ui.TextInput(label='구매 수량', placeholder='숫자만 입력해주세요.', required=True)
@@ -113,7 +117,6 @@ class OrderModal(discord.ui.Modal, title='상품 구매 정보 입력'):
         await channel.send(content=msg_content, embed=embed, view=CloseTicketView())
         await interaction.response.send_message(f"{channel.mention} 채널이 생성되었습니다.", ephemeral=True)
 
-# --- [구매 기능] 2. 구매하기 버튼 뷰 ---
 class PurchaseView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
@@ -122,7 +125,9 @@ class PurchaseView(discord.ui.View):
     async def purchase_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.send_modal(OrderModal())
 
-# --- [후기 기능] 모달 및 뷰 ---
+# ---------------------------------------------------------
+# [후기 기능] 모달 및 뷰
+# ---------------------------------------------------------
 class ReviewModal(discord.ui.Modal, title='후기 작성하기'):
     satisfaction = discord.ui.TextInput(label='만족도 (1~5)', placeholder='5', min_length=1, max_length=1)
     content = discord.ui.TextInput(label='구매 후기', style=discord.TextStyle.paragraph, placeholder='내용을 입력하세요.', required=True)
@@ -150,32 +155,41 @@ class ReviewView(discord.ui.View):
     async def write_review(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.send_modal(ReviewModal())
 
-# --- 이벤트 및 명령어 ---
+# ---------------------------------------------------------
+# 이벤트 및 명령어 (클래스 정의보다 아래에 위치)
+# ---------------------------------------------------------
 @bot.event
 async def on_ready():
-    # 영구적인 버튼 등록 (서버 재시작 시에도 작동)
+    # 영구적인 버튼 등록
     bot.add_view(PurchaseView())
     bot.add_view(CloseTicketView())
     bot.add_view(ReviewView())
     bot.add_view(InquiryView())
-    print(f'---------------------------------')
-    print(f'봇 이름: {bot.user.name}')
-    print(f'기능 합치기 완료 (구매/후기/문의)')
-    print(f'---------------------------------')
+    print(f'봇 온라인: {bot.user.name}')
 
 @bot.command(name="구매생성")
 async def create_purchase(ctx):
-    embed = discord.Embed(title="🛒 구매상품", description="구매하시려면 아래 버튼을 눌러주세요.", color=0x3CA45C)
-    await ctx.send(embed=embed, view=PurchaseView())
+    try:
+        embed = discord.Embed(title="🛒 구매상품", description="구매하시려면 아래 버튼을 눌러주세요.", color=0x3CA45C)
+        await ctx.send(embed=embed, view=PurchaseView())
+    except Exception as e:
+        await ctx.send(f"오류 발생: {e}")
 
 @bot.command(name="문의생성")
 async def create_inquiry(ctx):
-    embed = discord.Embed(title="📬 문의사항", description="문의하시려면 아래 버튼을 클릭해주세요.", color=0x3CA45C)
-    await ctx.send(embed=embed, view=InquiryView())
+    try:
+        embed = discord.Embed(title="📬 문의사항", description="문의하시려면 아래 버튼을 클릭해주세요.", color=0x3CA45C)
+        await ctx.send(embed=embed, view=InquiryView())
+    except Exception as e:
+        # 명령어가 반응이 없을 경우를 대비해 채팅창에 에러 출력
+        await ctx.send(f"오류 발생: {e}")
 
 @bot.command(name="후기생성")
 async def create_review(ctx):
-    await ctx.send("아래 버튼을 눌러 후기를 남겨주세요!", view=ReviewView())
+    try:
+        await ctx.send("아래 버튼을 눌러 후기를 남겨주세요!", view=ReviewView())
+    except Exception as e:
+        await ctx.send(f"오류 발생: {e}")
 
 # --- [실행] ---
 if __name__ == "__main__":
@@ -184,4 +198,4 @@ if __name__ == "__main__":
     if token:
         bot.run(token)
     else:
-        print("에러: TOKEN 환경 변수가 없습니다.")
+        print("에러: TOKEN 환경 변수가 설정되지 않았습니다.")
