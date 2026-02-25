@@ -71,7 +71,7 @@ class InquiryModal(discord.ui.Modal, title='📬 문의하기'):
             if role.permissions.administrator:
                 overwrites[role] = discord.PermissionOverwrite(read_messages=True, send_messages=True)
 
-        channel = await guild.create_text_channel(name=f"📬-{user.name}-문의", overwrites=overwrites)
+        channel = await guild.create_text_channel(name=f"{user.name}-문의", overwrites=overwrites)
 
         embed = discord.Embed(title="📬 새로운 문의 내용", color=0x3CA45C)
         embed.add_field(name="문의 사항", value=self.subject.value, inline=False)
@@ -108,8 +108,9 @@ class OrderModal(discord.ui.Modal, title='상품 구매 정보 입력'):
             if role.permissions.administrator:
                 overwrites[role] = discord.PermissionOverwrite(read_messages=True, send_messages=True)
 
-        channel = await guild.create_text_channel(name=f"🛒-{user.name}-구매", overwrites=overwrites)
-        msg_content = f"{user.mention}님, 주문이 접수되었습니다!\n토스뱅크 1908-9209-6452"
+        channel = await guild.create_text_channel(name=f"{user.name}-구매", overwrites=overwrites)
+        msg_content = f"{user.mention}님, 주문이 접수되었습니다!\n토스뱅크 1908-9209-6452
+        <@&1475315894464024606>"
         embed = discord.Embed(title="📦 새로운 주문 상세", color=0x2f3136)
         embed.add_field(name="상품명", value=self.item_name.value, inline=False)
         embed.add_field(name="수량", value=self.quantity.value, inline=False)
