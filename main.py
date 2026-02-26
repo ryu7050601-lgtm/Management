@@ -75,10 +75,7 @@ class InquiryModal(discord.ui.Modal, title='📬 문의하기'):
         embed.add_field(name="문의 내용", value=self.content.value, inline=False)
         embed.set_footer(text=f"작성자: {user.name} ({user.id})")
 
-        # 수정된 부분: 엔터 + 역할 멘션 추가
-        msg_content = f"{user.mention}님, 문의가 접수되었습니다. 관리자가 확인 후 답변드릴 예정입니다.\n\n<@&1475315894464024606>"
-        
-        await channel.send(content=msg_content, embed=embed, view=CloseTicketView())
+        await channel.send(content=f"{user.mention}님, 문의가 접수되었습니다. 관리자가 확인 후 답변드릴 예정입니다.", embed=embed, view=CloseTicketView())
         await interaction.response.send_message(f"{channel.mention} 채널이 생성되었습니다.", ephemeral=True)
 
 # --- [문의 기능] 2. 문의하기 버튼 뷰 ---
@@ -108,10 +105,7 @@ class OrderModal(discord.ui.Modal, title='상품 구매 정보 입력'):
                 overwrites[role] = discord.PermissionOverwrite(read_messages=True, send_messages=True)
 
         channel = await guild.create_text_channel(name=f"🛒-{user.name}-구매", overwrites=overwrites)
-        
-        # 수정된 부분: 엔터 + 역할 멘션 추가
-        msg_content = f"{user.mention}님, 주문이 접수되었습니다!\n토스뱅크 1908-9209-6452\n\n<@&1475315894464024606>"
-        
+        msg_content = f"{user.mention}님, 주문이 접수되었습니다!\n토스뱅크 1908-9209-6452"
         embed = discord.Embed(title="📦 새로운 주문 상세", color=0x2f3136)
         embed.add_field(name="상품명", value=self.item_name.value, inline=False)
         embed.add_field(name="수량", value=self.quantity.value, inline=False)
